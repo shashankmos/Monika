@@ -1,16 +1,33 @@
-// js/app.js
-gsap.registerPlugin(ScrollTrigger);
-
-// Utility to apply premium film grain via a tiny SVG data URI dynamically
-const grainSVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`;
-const style = document.createElement('style');
-style.innerHTML = `
-    body::after {
-        background-image: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%), ${grainSVG};
-        opacity: 0.18;
-    }
-`;
-document.head.appendChild(style);
+// Premium Preloader Logic
+window.addEventListener('load', () => {
+    const preloader = document.getElementById('preloader');
+    const progressBar = document.querySelector('.progress-bar');
+    
+    // Smooth progress simulation
+    gsap.to(progressBar, {
+        width: '100%',
+        duration: 1.5,
+        ease: 'power2.inOut',
+        onComplete: () => {
+            gsap.to(preloader, {
+                opacity: 0,
+                duration: 1,
+                delay: 0.5,
+                onComplete: () => {
+                    preloader.style.visibility = 'hidden';
+                    // Trigger entrance of the first scene
+                    gsap.from('.intro-scene .gsap-fade', {
+                        y: 30,
+                        opacity: 0,
+                        duration: 1.2,
+                        stagger: 0.2,
+                        ease: 'power3.out'
+                    });
+                }
+            });
+        }
+    });
+});
 
 // Target all scenes
 const scenes = gsap.utils.toArray('.scene');
@@ -21,36 +38,36 @@ scenes.forEach((scene, i) => {
     const introText = scene.querySelectorAll('.void-content h1, .void-content h2, .void-content p, .void-content div');
     const video = scene.querySelector('video');
 
-    // 1. 3D DEPTH TRANSITIONS BETWEEN SECTIONS
-    // When a scene scrolls into view, it scales up smoothly from the back (translateZ).
-    // This perfectly mimics high-end immersive feeds.
+    // 1. REFINED 3D DEPTH TRANSITIONS BETWEEN SECTIONS
+    // Using a more subtle scale and translateZ for premium smoothness.
     gsap.fromTo(scene, 
-        { z: -150, scale: 0.9, opacity: 0 },
+        { z: -80, scale: 0.94, opacity: 0, filter: "blur(10px)" }, // Start more subtle
         {
             z: 0,
             scale: 1,
             opacity: 1,
-            ease: "none", // Scrubbed linearly with scroll
+            filter: "blur(0px)",
+            ease: "power2.out", 
             scrollTrigger: {
                 trigger: scene,
                 start: "top bottom", 
                 end: "top top",      
-                scrub: true
+                scrub: 1.2 // Added smoothing for scrub
             }
         }
     );
 
-    // When the section leaves at the top, it scales down slightly and fades out
+    // When the section leaves at the top, it scales up and fades out (cinematic exit)
     gsap.to(scene, {
-        scale: 0.85,
+        scale: 1.05,
         opacity: 0,
-        yPercent: -5,
+        filter: "blur(10px)",
         ease: "none",
         scrollTrigger: {
             trigger: scene,
             start: "top top",
             end: "bottom top",
-            scrub: true
+            scrub: 1.2
         }
     });
 
@@ -132,12 +149,24 @@ scenes.forEach((scene, i) => {
         // Auto-play / Pause logic optimized for viewport boundaries
         ScrollTrigger.create({
             trigger: scene,
-            start: "top 80%", 
-            end: "bottom 20%",
-            onEnter: () => { video.play().catch(() => {}); },
+            start: "top 90%", 
+            end: "bottom 10%",
+            onEnter: () => { 
+                video.play().catch(() => {
+                    // Fallback if autoplay is blocked or fails
+                    video.muted = true;
+                    video.play();
+                }); 
+            },
             onLeave: () => { video.pause(); },
             onEnterBack: () => { video.play().catch(() => {}); },
             onLeaveBack: () => { video.pause(); }
+        });
+
+        // Error handling for black screens
+        video.addEventListener('error', function() {
+            console.error("Video failed to load:", video.currentSrc);
+            video.style.display = 'none'; // Maybe show a poster image instead
         });
         
         // Very slow intrinsic zoom (continuous scaling while scrolling) 

@@ -21,11 +21,11 @@ html, body {
     background-color: var(--bg-dark);
     color: var(--text-primary);
     font-family: var(--font-body);
-    /* Native CSS Snap for perfectly hitting sections */
-    scroll-behavior: smooth;
-    scroll-snap-type: y mandatory; 
+    /* Removing native snap to let GSAP handle smooth transitions better */
+    scroll-behavior: auto; 
     overflow-x: hidden;
     overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Subtle Film Grain & Vignette Overlay */
@@ -103,13 +103,14 @@ body::after {
 
 .bottom-caption p {
     font-family: var(--font-heading);
-    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-size: clamp(1.6rem, 6vw, 2.5rem); /* Increased size for premium feel */
     font-weight: 400;
     color: var(--text-primary);
     line-height: 1.3;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.9);
+    text-shadow: 0 4px 30px rgba(0,0,0,1);
     font-style: italic;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    backdrop-filter: blur(2px); /* Subtle blur behind text */
 }
 
 /* Intro and Outro Typography */
@@ -158,4 +159,90 @@ h2 {
     color: var(--gold);
 }
 
-/* We removed exact GSAP starting classes (.gsap-fade-up, etc.) from CSS to let GSAP initialize them fully to eliminate flashing */
+/* Premium Preloader Styles */
+#preloader {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 1s ease, visibility 1s ease;
+}
+
+.preloader-content {
+    text-align: center;
+}
+
+.loading-text {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+}
+
+.progress-bar-container {
+    width: 280px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 0; left: 0;
+    width: 0%; height: 100%;
+    background: var(--gold);
+    box-shadow: 0 0 15px var(--gold);
+}
+
+/* Enhanced Visual Hierarchy & Spacing */
+.scene {
+    padding: 2rem 5%;
+}
+
+h1 {
+    margin-bottom: 2rem;
+    text-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.void-content p {
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
+}
+
+/* Cinematic Vignette Over Media Content */
+.scene::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%);
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Subtle "Feeling Lines" - Floating Background Elements */
+.bg-extra {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+/* Responsive refinements */
+@media (max-width: 768px) {
+    .bottom-caption p {
+        font-size: 1.4rem;
+        padding-bottom: 15%;
+    }
+}
